@@ -265,6 +265,37 @@
             border-color: var(--primary);
         }
 
+        /* Legend for Map */
+        .map-legend {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .legend-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--primary-dark);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            border-radius: 3px;
+        }
+
         /* Warning Cards */
         .warning-cards {
             display: grid;
@@ -396,7 +427,7 @@
             font-size: 0.9rem;
         }
 
-        /* Footer - REVISI UTAMA */
+        /* Footer */
         footer {
             background-color: var(--primary-dark);
             color: white;
@@ -523,7 +554,14 @@
                 padding: 0;
             }
 
-            /* REVISI FOOTER UNTUK MOBILE */
+            .map-legend {
+                bottom: 20px;
+                right: 20px;
+                padding: 10px;
+                font-size: 0.8rem;
+            }
+
+            /* Footer untuk Mobile */
             footer {
                 padding: 1.5rem 1rem;
                 margin-top: 2rem;
@@ -553,7 +591,6 @@
         }
 
         @media (max-width: 480px) {
-            /* Tambahan untuk perangkat sangat kecil */
             footer {
                 padding: 1rem 0.8rem;
             }
@@ -707,6 +744,25 @@
             
             <div class="map-container">
                 <div id="map"></div>
+                <div class="map-legend">
+                    <div class="legend-title">Keterangan Komoditas</div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: rgba(76, 175, 80, 0.6); border: 2px solid #2E7D32;"></div>
+                        <span>Padi</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: rgba(255, 193, 7, 0.6); border: 2px solid #FF8F00;"></div>
+                        <span>Jagung</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: rgba(121, 85, 72, 0.6); border: 2px solid #5D4037;"></div>
+                        <span>Kedelai</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: rgba(233, 30, 99, 0.6); border: 2px solid #C2185B;"></div>
+                        <span>Hortikultura</span>
+                    </div>
+                </div>
             </div>
             
             <div class="chart-container">
@@ -842,7 +898,7 @@
         </div>
     </div>
 
-    <!-- Footer - REVISI MINIMALIS -->
+    <!-- Footer -->
     <footer>
         <div class="footer-container">
             <div class="footer-section">
@@ -922,7 +978,7 @@
                 
                 // Filter markers on map based on selection
                 const filter = this.getAttribute('data-filter');
-                filterMapMarkers(filter);
+                filterMapPolygons(filter);
             });
         });
 
@@ -971,8 +1027,8 @@
             }
         });
 
-        // Map initialization and markers
-        let mapMarkers = [];
+        // Map initialization and polygons
+        let mapPolygons = [];
         
         function initMap() {
             if (document.getElementById('map')._leaflet_id) {
@@ -988,130 +1044,184 @@
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(map);
             
-            // Define different locations in Tidore for different commodities
-            const locations = [
+            // Define polygon areas for different commodities in Tidore
+            const polygonAreas = [
                 { 
-                    lat: 0.735, 
-                    lng: 127.377, 
-                    title: 'Lahan Padi Tidore', 
+                    // Padi - Area Kalaodi
+                    coordinates: [
+                        [0.735, 127.377],
+                        [0.745, 127.390],
+                        [0.728, 127.405],
+                        [0.715, 127.392],
+                        [0.725, 127.375]
+                    ],
+                    title: 'Lahan Padi Kalaodi', 
                     komoditas: 'padi',
-                    area: '15 Ha',
-                    variety: 'IR64'
+                    area: '45 Ha',
+                    variety: 'IR64 dan Ciherang',
+                    produksi: '28 Ton/Ha'
                 },
                 { 
-                    lat: 0.725, 
-                    lng: 127.427, 
-                    title: 'Lahan Jagung Tidore', 
+                    // Jagung - Area Tomalou
+                    coordinates: [
+                        [0.725, 127.427],
+                        [0.738, 127.440],
+                        [0.720, 127.455],
+                        [0.705, 127.442],
+                        [0.715, 127.425]
+                    ],
+                    title: 'Lahan Jagung Tomalou', 
                     komoditas: 'jagung',
-                    area: '22 Ha',
-                    variety: 'Bisi 2'
+                    area: '38 Ha',
+                    variety: 'Bisi 2 dan Pioneer',
+                    produksi: '7.2 Ton/Ha'
                 },
                 { 
-                    lat: 0.685, 
-                    lng: 127.417, 
-                    title: 'Lahan Kedelai Tidore', 
+                    // Kedelai - Area Gurabati
+                    coordinates: [
+                        [0.685, 127.417],
+                        [0.695, 127.430],
+                        [0.678, 127.445],
+                        [0.665, 127.432],
+                        [0.675, 127.415]
+                    ],
+                    title: 'Lahan Kedelai Gurabati', 
                     komoditas: 'kedelai',
-                    area: '18 Ha',
-                    variety: 'Anjasmoro'
+                    area: '32 Ha',
+                    variety: 'Anjasmoro dan Grobogan',
+                    produksi: '2.1 Ton/Ha'
                 },
                 { 
-                    lat: 0.665, 
-                    lng: 127.367, 
-                    title: 'Kebun Hortikultura Tidore', 
+                    // Hortikultura - Area Toseho
+                    coordinates: [
+                        [0.665, 127.367],
+                        [0.675, 127.380],
+                        [0.658, 127.395],
+                        [0.645, 127.382],
+                        [0.655, 127.365]
+                    ],
+                    title: 'Kebun Hortikultura Toseho', 
                     komoditas: 'hortikultura',
-                    area: '30 Ha',
-                    variety: 'Cabai, Tomat, Bawang'
+                    area: '28 Ha',
+                    variety: 'Cabai, Tomat, Bawang Merah',
+                    produksi: '12.5 Ton/Ha'
                 },
                 { 
-                    lat: 0.700, 
-                    lng: 127.450, 
-                    title: 'Lahan Padi Oba', 
+                    // Padi - Area Tambula
+                    coordinates: [
+                        [0.700, 127.450],
+                        [0.710, 127.463],
+                        [0.693, 127.478],
+                        [0.680, 127.465],
+                        [0.690, 127.448]
+                    ],
+                    title: 'Lahan Padi Tambula', 
                     komoditas: 'padi',
-                    area: '25 Ha',
-                    variety: 'Ciherang'
+                    area: '52 Ha',
+                    variety: 'Inpari 32',
+                    produksi: '6.8 Ton/Ha'
                 },
                 { 
-                    lat: 0.640, 
-                    lng: 127.420, 
-                    title: 'Perkebunan Jagung Selatan', 
+                    // Jagung - Area Loto
+                    coordinates: [
+                        [0.640, 127.420],
+                        [0.650, 127.433],
+                        [0.633, 127.448],
+                        [0.620, 127.435],
+                        [0.630, 127.418]
+                    ],
+                    title: 'Perkebunan Jagung Loto', 
                     komoditas: 'jagung',
-                    area: '35 Ha',
-                    variety: 'Pioneer'
+                    area: '41 Ha',
+                    variety: 'NASA 29',
+                    produksi: '8.1 Ton/Ha'
                 }
             ];
             
-            // Define icons for different commodities
-            const iconPadi = L.divIcon({
-                html: '<i class="fas fa-seedling" style="color: #2E7D32; font-size: 20px;"></i>',
-                className: 'custom-div-icon',
-                iconSize: [20, 20],
-                iconAnchor: [10, 10]
-            });
+            // Define styles for different commodities
+            const stylePadi = {
+                color: '#2E7D32',
+                weight: 2,
+                opacity: 0.8,
+                fillColor: '#4CAF50',
+                fillOpacity: 0.4
+            };
             
-            const iconJagung = L.divIcon({
-                html: '<i class="fas fa-corn" style="color: #FF9800; font-size: 20px;"></i>',
-                className: 'custom-div-icon',
-                iconSize: [20, 20],
-                iconAnchor: [10, 10]
-            });
+            const styleJagung = {
+                color: '#FF8F00',
+                weight: 2,
+                opacity: 0.8,
+                fillColor: '#FFC107',
+                fillOpacity: 0.4
+            };
             
-            const iconKedelai = L.divIcon({
-                html: '<i class="fas fa-leaf" style="color: #795548; font-size: 20px;"></i>',
-                className: 'custom-div-icon',
-                iconSize: [20, 20],
-                iconAnchor: [10, 10]
-            });
+            const styleKedelai = {
+                color: '#5D4037',
+                weight: 2,
+                opacity: 0.8,
+                fillColor: '#795548',
+                fillOpacity: 0.4
+            };
             
-            const iconHortikultura = L.divIcon({
-                html: '<i class="fas fa-apple-alt" style="color: #E91E63; font-size: 20px;"></i>',
-                className: 'custom-div-icon',
-                iconSize: [20, 20],
-                iconAnchor: [10, 10]
-            });
+            const styleHortikultura = {
+                color: '#C2185B',
+                weight: 2,
+                opacity: 0.8,
+                fillColor: '#E91E63',
+                fillOpacity: 0.4
+            };
             
-            // Add markers to map
-            locations.forEach(location => {
-                let icon;
+            // Add polygons to map
+            polygonAreas.forEach(area => {
+                let style;
                 
-                switch(location.komoditas) {
+                switch(area.komoditas) {
                     case 'padi':
-                        icon = iconPadi;
+                        style = stylePadi;
                         break;
                     case 'jagung':
-                        icon = iconJagung;
+                        style = styleJagung;
                         break;
                     case 'kedelai':
-                        icon = iconKedelai;
+                        style = styleKedelai;
                         break;
                     case 'hortikultura':
-                        icon = iconHortikultura;
+                        style = styleHortikultura;
                         break;
                     default:
-                        icon = iconPadi;
+                        style = stylePadi;
                 }
                 
-                const marker = L.marker([location.lat, location.lng], { icon: icon })
+                const polygon = L.polygon(area.coordinates, style)
                     .addTo(map)
                     .bindPopup(`
-                        <b>${location.title}</b><br>
-                        Komoditas: ${location.komoditas}<br>
-                        Luas: ${location.area}<br>
-                        Varietas: ${location.variety}
+                        <div style="min-width: 200px;">
+                            <h4 style="margin: 0 0 10px 0; color: #2E7D32;">${area.title}</h4>
+                            <p><strong>Komoditas:</strong> ${area.komoditas}</p>
+                            <p><strong>Luas Area:</strong> ${area.area}</p>
+                            <p><strong>Varietas:</strong> ${area.variety}</p>
+                            <p><strong>Produktivitas:</strong> ${area.produksi}</p>
+                            <div style="margin-top: 10px; text-align: center;">
+                                <button class="btn btn-primary" style="padding: 5px 10px; font-size: 0.9rem;">
+                                    <i class="fas fa-chart-bar"></i> Lihat Detail
+                                </button>
+                            </div>
+                        </div>
                     `);
                 
-                mapMarkers.push({
-                    marker: marker,
-                    komoditas: location.komoditas
+                mapPolygons.push({
+                    polygon: polygon,
+                    komoditas: area.komoditas
                 });
             });
         }
         
-        function filterMapMarkers(filter) {
-            mapMarkers.forEach(item => {
+        function filterMapPolygons(filter) {
+            mapPolygons.forEach(item => {
                 if (filter === 'all' || item.komoditas === filter) {
-                    item.marker.addTo(window.map);
+                    item.polygon.addTo(window.map);
                 } else {
-                    window.map.removeLayer(item.marker);
+                    window.map.removeLayer(item.polygon);
                 }
             });
         }
