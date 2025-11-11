@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoTani - Platform Pertanian Cerdas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <style>
+        :root {
+            --primary: #2E7D32;
+            --primary-light: #4CAF50;
+            --primary-dark: #1B5E20;
+            --secondary: #FF9800;
+            --warning: #F44336;
+            --info: #2196F3;
+            --light: #F5F5F5;
+            --dark: #333333;
+            --gray: #757575;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        /* Header & Navigation */
+        header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo h1 {
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+
+        .logo i {
+            color: var(--primary);
+            font-size: 1.8rem;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 1.5rem;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--gray);
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        nav a:hover {
+            color: var(--primary);
+            background-color: rgba(46, 125, 50, 0.1);
+        }
+
+        nav a.active {
+            color: var(--primary);
+            background-color: rgba(46, 125, 50, 0.1);
+            font-weight: 600;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--primary);
+            cursor: pointer;
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .page-title {
+            margin-bottom: 1.5rem;
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Cards */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            padding: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .icon-primary {
+            background-color: rgba(46, 125, 50, 0.1);
+            color: var(--primary);
+        }
+
+        .icon-warning {
+            background-color: rgba(244, 67, 54, 0.1);
+            color: var(--warning);
+        }
+
+        .icon-info {
+            background-color: rgba(33, 150, 243, 0.1);
+            color: var(--info);
+        }
+
+        .card-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .card-footer {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-title {
+            margin-bottom: 1rem;
+            color: var(--primary-dark);
+        }
+
+        .chart-placeholder {
+            height: 300px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray);
+            font-style: italic;
+        }
+
+        /* Map Container */
+        .map-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        #map {
+            height: 500px;
+            border-radius: 8px;
+            z-index: 1;
+        }
+
+        .map-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Legend for Map */
+        .map-legend {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .legend-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--primary-dark);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            border-radius: 3px;
+        }
+
+        /* Warning Cards */
+        .warning-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .warning-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            padding: 1.5rem;
+            border-left: 4px solid var(--warning);
+        }
+
+        .warning-card.medium {
+            border-left-color: var(--secondary);
+        }
+
+        .warning-card.low {
+            border-left-color: var(--info);
+        }
+
+        .warning-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .warning-title {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .warning-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .badge-high {
+            background-color: rgba(244, 67, 54, 0.1);
+            color: var(--warning);
+        }
+
+        .badge-medium {
+            background-color: rgba(255, 152, 0, 0.1);
+            color: var(--secondary);
+        }
+
+        .badge-low {
+            background-color: rgba(33, 150, 243, 0.1);
+            color: var(--info);
+        }
+
+        .warning-location {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--gray);
+            margin-bottom: 0.5rem;
+        }
+
+        .warning-desc {
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .warning-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+
+        /* Weather Info */
+        .weather-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .weather-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .weather-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--info);
+        }
+
+        .weather-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .weather-label {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--primary-dark);
+            color: white;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .footer-section p, .footer-section a {
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 0.5rem;
+            display: block;
+            text-decoration: none;
+        }
+
+        .footer-section a:hover {
+            color: white;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 2rem;
+            margin-top: 2rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.5);
+            font-size: 0.9rem;
+        }
+
+        /* Map Fullscreen Mode */
+        .map-fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2000;
+            background: white;
+        }
+
+        .map-fullscreen .map-container {
+            height: 100%;
+            padding: 0;
+            border-radius: 0;
+            margin: 0;
+        }
+
+        .map-fullscreen #map {
+            height: 100%;
+            border-radius: 0;
+        }
+
+        .close-fullscreen {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 2001;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .header-container {
+                padding: 1rem;
+                position: relative;
+            }
+
+            nav ul {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: white;
+                flex-direction: column;
+                padding: 1rem;
+                box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+                z-index: 1001;
+            }
+
+            nav ul.show {
+                display: flex;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .cards, .warning-cards, .weather-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+
+            .map-fullscreen .map-container {
+                padding: 0;
+            }
+
+            .map-legend {
+                bottom: 20px;
+                right: 20px;
+                padding: 10px;
+                font-size: 0.8rem;
+            }
+
+            /* Footer untuk Mobile */
+            footer {
+                padding: 1.5rem 1rem;
+                margin-top: 2rem;
+            }
+
+            .footer-container {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+                text-align: center;
+            }
+
+            .footer-section h3 {
+                font-size: 1.1rem;
+                margin-bottom: 0.8rem;
+            }
+
+            .footer-section p, .footer-section a {
+                font-size: 0.85rem;
+                margin-bottom: 0.4rem;
+            }
+
+            .copyright {
+                padding-top: 1.5rem;
+                margin-top: 1.5rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            footer {
+                padding: 1rem 0.8rem;
+            }
+            
+            .footer-container {
+                gap: 1rem;
+            }
+            
+            .footer-section h3 {
+                font-size: 1rem;
+            }
+            
+            .footer-section p, .footer-section a {
+                font-size: 0.8rem;
+            }
+            
+            .copyright {
+                font-size: 0.75rem;
+            }
+        }
+
+        /* Smooth scrolling for page transitions */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Loading indicator for weather */
+        .weather-loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header & Navigation -->
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <i class="fas fa-seedling"></i>
+                <h1>GeoTani</h1>
+            </div>
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <nav>
+                <ul id="navMenu">
+                    <li><a href="#dashboard" class="nav-link active" data-page="dashboard"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li><a href="#peta" class="nav-link" data-page="peta"><i class="fas fa-map"></i> Peta Komoditas</a></li>
+                    <li><a href="#cuaca" class="nav-link" data-page="cuaca"><i class="fas fa-cloud-sun"></i> Data Cuaca</a></li>
+                    <li><a href="#warning" class="nav-link" data-page="warning"><i class="fas fa-exclamation-triangle"></i> Early Warning</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Dashboard Page -->
+        <div id="dashboard-page" class="page active">
+            <h2 class="page-title"><i class="fas fa-home"></i> Dashboard</h2>
+            
+            <div class="cards">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Luas Tanam Aktif</div>
+                        <div class="card-icon icon-primary">
+                            <i class="fas fa-tractor"></i>
+                        </div>
+                    </div>
+                    <div class="card-value">2.450 Ha</div>
+                    <div class="card-footer">+5.2% dari bulan sebelumnya</div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Produksi Bulan Ini</div>
+                        <div class="card-icon icon-info">
+                            <i class="fas fa-weight-hanging"></i>
+                        </div>
+                    </div>
+                    <div class="card-value">1.230 Ton</div>
+                    <div class="card-footer">Beras, Jagung, Kedelai</div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Potensi Stok Aman</div>
+                        <div class="card-icon icon-primary">
+                            <i class="fas fa-warehouse"></i>
+                        </div>
+                    </div>
+                    <div class="card-value">3 Bulan</div>
+                    <div class="card-footer">Cukup hingga September 2023</div>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <h3 class="chart-title">Trend Produksi 6 Bulan Terakhir</h3>
+                <div class="chart-placeholder">
+                    [Grafik Trend Produksi Akan Ditampilkan Di Sini]
+                </div>
+            </div>
+            
+            <div class="cards">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Peringatan Aktif</div>
+                        <div class="card-icon icon-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                    </div>
+                    <div class="card-value">3</div>
+                    <div class="card-footer">Perlu perhatian segera</div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Curah Hujan</div>
+                        <div class="card-icon icon-info">
+                            <i class="fas fa-cloud-rain"></i>
+                        </div>
+                    </div>
+                    <div class="card-value">45 mm</div>
+                    <div class="card-footer">Bulan ini</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Peta Komoditas Page -->
+        <div id="peta-page" class="page">
+            <h2 class="page-title"><i class="fas fa-map"></i> Peta Komoditas</h2>
+            
+            <div class="map-controls">
+                <button class="filter-btn active" data-filter="all">Semua Komoditas</button>
+                <button class="filter-btn" data-filter="padi">Padi</button>
+                <button class="filter-btn" data-filter="jagung">Jagung</button>
+                <button class="filter-btn" data-filter="kedelai">Kedelai</button>
+                <button class="filter-btn" data-filter="hortikultura">Hortikultura</button>
+                <button class="btn btn-outline" id="fullscreenToggle"><i class="fas fa-expand"></i> Layar Penuh</button>
+            </div>
+            
+            <div class="map-container">
+                <div id="map"></div>
+                <div class="map-legend">
+                    <div class="legend-title">Keterangan Komoditas</div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: rgba(76, 175, 80, 0.6); border: 2px solid #2E7D32;"></div>
+                        <span>Padi</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: rgba(255, 193, 7, 0.6); border: 2px solid #FF8F00;"></div>
+                        <span>Jagung</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: rgba(121, 85, 72, 0.6); border: 2px solid #5D4037;"></div>
+                        <span>Kedelai</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: rgba(233, 30, 99, 0.6); border: 2px solid #C2185B;"></div>
+                        <span>Hortikultura</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <h3 class="chart-title">Distribusi Komoditas per Wilayah</h3>
+                <div class="chart-placeholder">
+                    [Grafik Distribusi Komoditas Akan Ditampilkan Di Sini]
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Cuaca Page -->
+        <div id="cuaca-page" class="page">
+            <h2 class="page-title"><i class="fas fa-cloud-sun"></i> Data Cuaca</h2>
+            
+            <div class="weather-cards">
+                <div class="weather-card">
+                    <div class="weather-icon">
+                        <i class="fas fa-cloud-rain"></i>
+                    </div>
+                    <div class="weather-value" id="rainfall">45 mm</div>
+                    <div class="weather-label">Curah Hujan</div>
+                </div>
+                
+                <div class="weather-card">
+                    <div class="weather-icon">
+                        <i class="fas fa-thermometer-half"></i>
+                    </div>
+                    <div class="weather-value" id="temperature">28°C</div>
+                    <div class="weather-label">Suhu Rata-rata</div>
+                </div>
+                
+                <div class="weather-card">
+                    <div class="weather-icon">
+                        <i class="fas fa-tint"></i>
+                    </div>
+                    <div class="weather-value" id="humidity">82%</div>
+                    <div class="weather-label">Kelembapan</div>
+                </div>
+                
+                <div class="weather-card">
+                    <div class="weather-icon">
+                        <i class="fas fa-wind"></i>
+                    </div>
+                    <div class="weather-value" id="wind">12 km/jam</div>
+                    <div class="weather-label">Kecepatan Angin</div>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <h3 class="chart-title">Prakiraan Cuaca 7 Hari Ke Depan <span id="weatherLoading" class="weather-loading"></span></h3>
+                <div class="chart-placeholder" id="weatherChart">
+                    [Grafik Prakiraan Cuaca Akan Ditampilkan Di Sini]
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <h3 class="chart-title">Data Historis Curah Hujan</h3>
+                <div class="chart-placeholder">
+                    [Grafik Historis Curah Hujan Akan Ditampilkan Di Sini]
+                </div>
+            </div>
+        </div>
+
+        <!-- Early Warning Page -->
+        <div id="warning-page" class="page">
+            <h2 class="page-title"><i class="fas fa-exclamation-triangle"></i> Sistem Peringatan Dini</h2>
+            
+            <div class="warning-cards">
+                <div class="warning-card">
+                    <div class="warning-header">
+                        <div class="warning-title">Potensi Kekeringan</div>
+                        <div class="warning-badge badge-high">Tinggi</div>
+                    </div>
+                    <div class="warning-location">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Wilayah Oba Tengah, Tidore</span>
+                    </div>
+                    <div class="warning-desc">
+                        Prediksi kekeringan dengan tingkat keparahan tinggi dalam 7-10 hari ke depan. 
+                        Dampak potensial pada tanaman padi fase generatif.
+                    </div>
+                    <div class="warning-actions">
+                        <button class="btn btn-primary"><i class="fas fa-lightbulb"></i> Lihat Rekomendasi</button>
+                        <button class="btn btn-outline"><i class="fas fa-info-circle"></i> Detail</button>
+                    </div>
+                </div>
+                
+                <div class="warning-card medium">
+                    <div class="warning-header">
+                        <div class="warning-title">Serangan Hama Wereng</div>
+                        <div class="warning-badge badge-medium">Sedang</div>
+                    </div>
+                    <div class="warning-location">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Kecamatan Tidore, Kota Tidore</span>
+                    </div>
+                    <div class="warning-desc">
+                        Laporan serangan hama wereng coklat pada tanaman padi usia 45-60 HST. 
+                        Tingkat kerusakan saat ini 15-20%.
+                    </div>
+                    <div class="warning-actions">
+                        <button class="btn btn-primary"><i class="fas fa-lightbulb"></i> Lihat Rekomendasi</button>
+                        <button class="btn btn-outline"><i class="fas fa-info-circle"></i> Detail</button>
+                    </div>
+                </div>
+                
+                <div class="warning-card low">
+                    <div class="warning-header">
+                        <div class="warning-title">Curah Hujan Tinggi</div>
+                        <div class="warning-badge badge-low">Rendah</div>
+                    </div>
+                    <div class="warning-location">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Wilayah Tidore Selatan</span>
+                    </div>
+                    <div class="warning-desc">
+                        Prakiraan curah hujan tinggi dalam 3-5 hari ke depan. 
+                        Berpotensi menyebabkan genangan pada lahan dengan drainase kurang baik.
+                    </div>
+                    <div class="warning-actions">
+                        <button class="btn btn-primary"><i class="fas fa-lightbulb"></i> Lihat Rekomendasi</button>
+                        <button class="btn btn-outline"><i class="fas fa-info-circle"></i> Detail</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <h3 class="chart-title">History Peringatan 3 Bulan Terakhir</h3>
+                <div class="chart-placeholder">
+                    [Grafik History Peringatan Akan Ditampilkan Di Sini]
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>GeoTani</h3>
+                <p>Platform pemantauan pertanian cerdas</p>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Kontak</h3>
+                <p><i class="fas fa-envelope"></i> info@geotani.id</p>
+                <p><i class="fas fa-phone"></i> (021) 1234-5678</p>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Tautan</h3>
+                <a href="#dashboard">Dashboard</a>
+                <a href="#peta">Peta Komoditas</a>
+                <a href="#cuaca">Data Cuaca</a>
+            </div>
+        </div>
+        
+        <div class="copyright">
+            &copy; 2023 GeoTani. All rights reserved.
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Mobile Menu Toggle
+        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+            document.getElementById('navMenu').classList.toggle('show');
+        });
+
+        // Page Navigation with Smooth Scroll
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Update active nav link
+                document.querySelectorAll('.nav-link').forEach(item => {
+                    item.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                // Show selected page
+                const pageId = this.getAttribute('data-page') + '-page';
+                document.querySelectorAll('.page').forEach(page => {
+                    page.classList.remove('active');
+                });
+                document.getElementById(pageId).classList.add('active');
+                
+                // Close mobile menu if open
+                document.getElementById('navMenu').classList.remove('show');
+                
+                // Initialize map if on map page
+                if (this.getAttribute('data-page') === 'peta') {
+                    initMap();
+                    // Smooth scroll to top of page
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+                
+                // Load weather data if on weather page
+                if (this.getAttribute('data-page') === 'cuaca') {
+                    loadWeatherData();
+                }
+            });
+        });
+
+        // Filter Buttons for Map
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => {
+                    b.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                // Filter markers on map based on selection
+                const filter = this.getAttribute('data-filter');
+                filterMapPolygons(filter);
+            });
+        });
+
+        // Fullscreen Toggle for Map
+        document.getElementById('fullscreenToggle').addEventListener('click', function() {
+            const mapContainer = document.querySelector('.map-container');
+            const mapPage = document.getElementById('peta-page');
+            
+            if (!mapPage.classList.contains('map-fullscreen')) {
+                // Enter fullscreen
+                mapPage.classList.add('map-fullscreen');
+                document.body.style.overflow = 'hidden';
+                
+                // Create close button
+                const closeBtn = document.createElement('button');
+                closeBtn.className = 'close-fullscreen';
+                closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                closeBtn.addEventListener('click', function() {
+                    mapPage.classList.remove('map-fullscreen');
+                    document.body.style.overflow = '';
+                    closeBtn.remove();
+                });
+                
+                mapPage.appendChild(closeBtn);
+                this.innerHTML = '<i class="fas fa-compress"></i> Keluar Layar Penuh';
+                
+                // Update map size
+                if (window.map) {
+                    setTimeout(() => {
+                        window.map.invalidateSize();
+                    }, 300);
+                }
+            } else {
+                // Exit fullscreen
+                mapPage.classList.remove('map-fullscreen');
+                document.body.style.overflow = '';
+                document.querySelector('.close-fullscreen').remove();
+                this.innerHTML = '<i class="fas fa-expand"></i> Layar Penuh';
+                
+                // Update map size
+                if (window.map) {
+                    setTimeout(() => {
+                        window.map.invalidateSize();
+                    }, 300);
+                }
+            }
+        });
+
+        // Map initialization and polygons
+        let mapPolygons = [];
+        
+        function initMap() {
+            if (document.getElementById('map')._leaflet_id) {
+                window.map.invalidateSize();
+                return;
+            }
+            
+            // Set view to Tidore Islands
+            const map = L.map('map').setView([0.68, 127.40], 11);
+            window.map = map;
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            // Define polygon areas for different commodities in Tidore
+            const polygonAreas = [
+                { 
+                    // Padi - Area Kalaodi
+                    coordinates: [
+                        [0.735, 127.377],
+                        [0.745, 127.390],
+                        [0.728, 127.405],
+                        [0.715, 127.392],
+                        [0.725, 127.375]
+                    ],
+                    title: 'Lahan Padi Kalaodi', 
+                    komoditas: 'padi',
+                    area: '45 Ha',
+                    variety: 'IR64 dan Ciherang',
+                    produksi: '28 Ton/Ha'
+                },
+                { 
+                    // Jagung - Area Tomalou
+                    coordinates: [
+                        [0.725, 127.427],
+                        [0.738, 127.440],
+                        [0.720, 127.455],
+                        [0.705, 127.442],
+                        [0.715, 127.425]
+                    ],
+                    title: 'Lahan Jagung Tomalou', 
+                    komoditas: 'jagung',
+                    area: '38 Ha',
+                    variety: 'Bisi 2 dan Pioneer',
+                    produksi: '7.2 Ton/Ha'
+                },
+                { 
+                    // Kedelai - Area Gurabati
+                    coordinates: [
+                        [0.685, 127.417],
+                        [0.695, 127.430],
+                        [0.678, 127.445],
+                        [0.665, 127.432],
+                        [0.675, 127.415]
+                    ],
+                    title: 'Lahan Kedelai Gurabati', 
+                    komoditas: 'kedelai',
+                    area: '32 Ha',
+                    variety: 'Anjasmoro dan Grobogan',
+                    produksi: '2.1 Ton/Ha'
+                },
+                { 
+                    // Hortikultura - Area Toseho
+                    coordinates: [
+                        [0.665, 127.367],
+                        [0.675, 127.380],
+                        [0.658, 127.395],
+                        [0.645, 127.382],
+                        [0.655, 127.365]
+                    ],
+                    title: 'Kebun Hortikultura Toseho', 
+                    komoditas: 'hortikultura',
+                    area: '28 Ha',
+                    variety: 'Cabai, Tomat, Bawang Merah',
+                    produksi: '12.5 Ton/Ha'
+                },
+                { 
+                    // Padi - Area Tambula
+                    coordinates: [
+                        [0.700, 127.450],
+                        [0.710, 127.463],
+                        [0.693, 127.478],
+                        [0.680, 127.465],
+                        [0.690, 127.448]
+                    ],
+                    title: 'Lahan Padi Tambula', 
+                    komoditas: 'padi',
+                    area: '52 Ha',
+                    variety: 'Inpari 32',
+                    produksi: '6.8 Ton/Ha'
+                },
+                { 
+                    // Jagung - Area Loto
+                    coordinates: [
+                        [0.640, 127.420],
+                        [0.650, 127.433],
+                        [0.633, 127.448],
+                        [0.620, 127.435],
+                        [0.630, 127.418]
+                    ],
+                    title: 'Perkebunan Jagung Loto', 
+                    komoditas: 'jagung',
+                    area: '41 Ha',
+                    variety: 'NASA 29',
+                    produksi: '8.1 Ton/Ha'
+                }
+            ];
+            
+            // Define styles for different commodities
+            const stylePadi = {
+                color: '#2E7D32',
+                weight: 2,
+                opacity: 0.8,
+                fillColor: '#4CAF50',
+                fillOpacity: 0.4
+            };
+            
+            const styleJagung = {
+                color: '#FF8F00',
+                weight: 2,
+                opacity: 0.8,
+                fillColor: '#FFC107',
+                fillOpacity: 0.4
+            };
+            
+            const styleKedelai = {
+                color: '#5D4037',
+                weight: 2,
+                opacity: 0.8,
+                fillColor: '#795548',
+                fillOpacity: 0.4
+            };
+            
+            const styleHortikultura = {
+                color: '#C2185B',
+                weight: 2,
+                opacity: 0.8,
+                fillColor: '#E91E63',
+                fillOpacity: 0.4
+            };
+            
+            // Add polygons to map
+            polygonAreas.forEach(area => {
+                let style;
+                
+                switch(area.komoditas) {
+                    case 'padi':
+                        style = stylePadi;
+                        break;
+                    case 'jagung':
+                        style = styleJagung;
+                        break;
+                    case 'kedelai':
+                        style = styleKedelai;
+                        break;
+                    case 'hortikultura':
+                        style = styleHortikultura;
+                        break;
+                    default:
+                        style = stylePadi;
+                }
+                
+                const polygon = L.polygon(area.coordinates, style)
+                    .addTo(map)
+                    .bindPopup(`
+                        <div style="min-width: 200px;">
+                            <h4 style="margin: 0 0 10px 0; color: #2E7D32;">${area.title}</h4>
+                            <p><strong>Komoditas:</strong> ${area.komoditas}</p>
+                            <p><strong>Luas Area:</strong> ${area.area}</p>
+                            <p><strong>Varietas:</strong> ${area.variety}</p>
+                            <p><strong>Produktivitas:</strong> ${area.produksi}</p>
+                            <div style="margin-top: 10px; text-align: center;">
+                                <button class="btn btn-primary" style="padding: 5px 10px; font-size: 0.9rem;">
+                                    <i class="fas fa-chart-bar"></i> Lihat Detail
+                                </button>
+                            </div>
+                        </div>
+                    `);
+                
+                mapPolygons.push({
+                    polygon: polygon,
+                    komoditas: area.komoditas
+                });
+            });
+        }
+        
+        function filterMapPolygons(filter) {
+            mapPolygons.forEach(item => {
+                if (filter === 'all' || item.komoditas === filter) {
+                    item.polygon.addTo(window.map);
+                } else {
+                    window.map.removeLayer(item.polygon);
+                }
+            });
+        }
+
+        // Weather data loading (simulated real-time data for Tidore)
+        function loadWeatherData() {
+            const loadingElement = document.getElementById('weatherLoading');
+            loadingElement.style.display = 'inline-block';
+            
+            // Simulate API call delay
+            setTimeout(() => {
+                // Generate realistic weather data for Tidore
+                const rainfall = (Math.random() * 50 + 20).toFixed(1);
+                const temperature = (Math.random() * 5 + 26).toFixed(1);
+                const humidity = (Math.random() * 20 + 70).toFixed(0);
+                const wind = (Math.random() * 10 + 5).toFixed(1);
+                
+                // Update weather values
+                document.getElementById('rainfall').textContent = rainfall + ' mm';
+                document.getElementById('temperature').textContent = temperature + '°C';
+                document.getElementById('humidity').textContent = humidity + '%';
+                document.getElementById('wind').textContent = wind + ' km/jam';
+                
+                // Update weather chart placeholder
+                document.getElementById('weatherChart').innerHTML = 
+                    '<div style="text-align: center; padding: 20px; color: #4CAF50;">' +
+                    '<i class="fas fa-check-circle" style="font-size: 2rem; margin-bottom: 10px;"></i><br>' +
+                    'Data cuaca terkini untuk Kota Tidore telah dimuat<br>' +
+                    '<small>Terakhir diperbarui: ' + new Date().toLocaleTimeString() + '</small>' +
+                    '</div>';
+                
+                loadingElement.style.display = 'none';
+            }, 1500);
+        }
+
+        // Initialize the dashboard on load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize map if on map page
+            if (document.getElementById('peta-page').classList.contains('active')) {
+                initMap();
+            }
+            
+            // Load weather data if on weather page
+            if (document.getElementById('cuaca-page').classList.contains('active')) {
+                loadWeatherData();
+            }
+            
+            // Set up periodic weather updates (every 5 minutes)
+            setInterval(() => {
+                if (document.getElementById('cuaca-page').classList.contains('active')) {
+                    loadWeatherData();
+                }
+            }, 300000);
+        });
+    </script>
+</body>
+</html>

@@ -217,7 +217,7 @@
         }
 
         .chart-placeholder {
-            height: 300px;
+            min-height: 300px;
             background-color: #f8f9fa;
             border-radius: 8px;
             display: flex;
@@ -293,7 +293,7 @@
             width: 20px;
             height: 20px;
             margin-right: 10px;
-            border-radius: 3px;
+            border-radius: 50%;
         }
 
         /* Warning Cards */
@@ -509,6 +509,146 @@
             font-size: 1.2rem;
             color: var(--primary);
         }
+        
+        /* --- STYLING BARU UNTUK HALAMAN DATA PETANI --- */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 0.5rem;
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group select {
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            background-color: #f8f9fa;
+        }
+        
+        /* Style untuk dropdown yang disabled */
+        .form-group select:disabled {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.2);
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .table-wrapper {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .data-table th, .data-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .data-table th {
+            background-color: #f8f9fa;
+            color: var(--primary-dark);
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+        .data-table tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+        /* --- AKHIR STYLING BARU --- */
+
+        /* MODAL UNTUK PEMILIHAN LOKASI DI PETA */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 800px;
+            height: 80%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .modal-body {
+            flex: 1;
+            position: relative;
+        }
+
+        #mapModal {
+            height: 100%;
+            border-radius: 8px;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+        }
+
+        .location-preview {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .location-preview strong {
+            color: var(--primary);
+        }
 
         /* Responsive Styles */
         @media (max-width: 768px) {
@@ -588,6 +728,25 @@
                 margin-top: 1.5rem;
                 font-size: 0.8rem;
             }
+
+            /* Modal responsive */
+            .modal-content {
+                margin: 10% auto;
+                width: 95%;
+                height: 85%;
+            }
+        }
+        
+        /* Penyesuaian grid hasil data petani di desktop */
+        @media (min-width: 992px) {
+            .results-grid {
+                /* Buat 2 kolom di desktop */
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .results-grid .chart-container:first-child {
+                /* Tabel data memakan 2 kolom */
+                grid-column: 1 / -1;
+            }
         }
 
         @media (max-width: 480px) {
@@ -635,7 +794,6 @@
     </style>
 </head>
 <body>
-    <!-- Header & Navigation -->
     <header>
         <div class="header-container">
             <div class="logo">
@@ -648,7 +806,8 @@
             <nav>
                 <ul id="navMenu">
                     <li><a href="#dashboard" class="nav-link active" data-page="dashboard"><i class="fas fa-home"></i> Dashboard</a></li>
-                    <li><a href="#peta" class="nav-link" data-page="peta"><i class="fas fa-map"></i> Peta Komoditas</a></li>
+                    <li><a href="#peta" class="nav-link" data-page="peta"><i class="fas fa-map-marker-alt"></i> Peta Petani</a></li>
+                    <li><a href="#datapetani" class="nav-link" data-page="datapetani"><i class="fas fa-users"></i> Data Petani</a></li>
                     <li><a href="#cuaca" class="nav-link" data-page="cuaca"><i class="fas fa-cloud-sun"></i> Data Cuaca</a></li>
                     <li><a href="#warning" class="nav-link" data-page="warning"><i class="fas fa-exclamation-triangle"></i> Early Warning</a></li>
                 </ul>
@@ -656,9 +815,7 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <div class="container">
-        <!-- Dashboard Page -->
         <div id="dashboard-page" class="page active">
             <h2 class="page-title"><i class="fas fa-home"></i> Dashboard</h2>
             
@@ -670,75 +827,57 @@
                             <i class="fas fa-tractor"></i>
                         </div>
                     </div>
-                    <div class="card-value">2.450 Ha</div>
-                    <div class="card-footer">+5.2% dari bulan sebelumnya</div>
+                    <div class="card-value" id="dashboardLuasAktif">0 Ha</div>
+                    <div class="card-footer">Data dari petani terdaftar</div>
                 </div>
                 
                 <div class="card">
                     <div class="card-header">
-                        <div class="card-title">Produksi Bulan Ini</div>
+                        <div class="card-title">Estimasi Produksi</div>
                         <div class="card-icon icon-info">
                             <i class="fas fa-weight-hanging"></i>
                         </div>
                     </div>
-                    <div class="card-value">1.230 Ton</div>
-                    <div class="card-footer">Beras, Jagung, Kedelai</div>
+                    <div class="card-value" id="dashboardEstimasiProduksi">0 Ton</div>
+                    <div class="card-footer">Berdasarkan luas & komoditas</div>
                 </div>
                 
                 <div class="card">
                     <div class="card-header">
-                        <div class="card-title">Potensi Stok Aman</div>
+                        <div class="card-title">Jumlah Petani Terdata</div>
                         <div class="card-icon icon-primary">
-                            <i class="fas fa-warehouse"></i>
+                            <i class="fas fa-users"></i>
                         </div>
                     </div>
-                    <div class="card-value">3 Bulan</div>
-                    <div class="card-footer">Cukup hingga September 2023</div>
+                    <div class="card-value" id="dashboardJumlahPetani">0</div>
+                    <div class="card-footer">Total petani di sistem</div>
                 </div>
             </div>
             
             <div class="chart-container">
-                <h3 class="chart-title">Trend Produksi 6 Bulan Terakhir</h3>
-                <div class="chart-placeholder">
-                    [Grafik Trend Produksi Akan Ditampilkan Di Sini]
+                <h3 class="chart-title">Distribusi Luas Lahan per Kecamatan</h3>
+                <div class="chart-placeholder" id="dashboardLuasPerKecamatan">
+                    [Grafik Distribusi Luas Lahan Akan Ditampilkan Di Sini]
                 </div>
             </div>
             
-            <div class="cards">
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">Peringatan Aktif</div>
-                        <div class="card-icon icon-warning">
-                            <i class="fas fa-exclamation-triangle"></i>
-                        </div>
-                    </div>
-                    <div class="card-value">3</div>
-                    <div class="card-footer">Perlu perhatian segera</div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">Curah Hujan</div>
-                        <div class="card-icon icon-info">
-                            <i class="fas fa-cloud-rain"></i>
-                        </div>
-                    </div>
-                    <div class="card-value">45 mm</div>
-                    <div class="card-footer">Bulan ini</div>
+             <div class="chart-container">
+                <h3 class="chart-title">Distribusi Jumlah Petani per Komoditas</h3>
+                <div class="chart-placeholder" id="dashboardKomoditas">
+                    [Grafik Distribusi Komoditas Akan Ditampilkan Di Sini]
                 </div>
             </div>
         </div>
 
-        <!-- Peta Komoditas Page -->
         <div id="peta-page" class="page">
-            <h2 class="page-title"><i class="fas fa-map"></i> Peta Komoditas</h2>
+            <h2 class="page-title"><i class="fas fa-map-marker-alt"></i> Peta Sebaran Petani</h2>
             
             <div class="map-controls">
                 <button class="filter-btn active" data-filter="all">Semua Komoditas</button>
-                <button class="filter-btn" data-filter="padi">Padi</button>
-                <button class="filter-btn" data-filter="jagung">Jagung</button>
-                <button class="filter-btn" data-filter="kedelai">Kedelai</button>
-                <button class="filter-btn" data-filter="hortikultura">Hortikultura</button>
+                <button class="filter-btn" data-filter="Padi">Padi</button>
+                <button class="filter-btn" data-filter="Jagung">Jagung</button>
+                <button class="filter-btn" data-filter="Ubi">Ubi</button>
+                <button class="filter-btn" data-filter="Cabai">Cabai</button>
                 <button class="btn btn-outline" id="fullscreenToggle"><i class="fas fa-expand"></i> Layar Penuh</button>
             </div>
             
@@ -747,65 +886,134 @@
                 <div class="map-legend">
                     <div class="legend-title">Keterangan Komoditas</div>
                     <div class="legend-item">
-                        <div class="legend-color" style="background-color: rgba(76, 175, 80, 0.6); border: 2px solid #2E7D32;"></div>
-                        <span>Padi</span>
+                        <div class="legend-color" style="background-color: #4CAF50;"></div><span>Padi</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-color" style="background-color: rgba(255, 193, 7, 0.6); border: 2px solid #FF8F00;"></div>
-                        <span>Jagung</span>
+                        <div class="legend-color" style="background-color: #FFC107;"></div><span>Jagung</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-color" style="background-color: rgba(121, 85, 72, 0.6); border: 2px solid #5D4037;"></div>
-                        <span>Kedelai</span>
+                        <div class="legend-color" style="background-color: #795548;"></div><span>Ubi</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-color" style="background-color: rgba(233, 30, 99, 0.6); border: 2px solid #C2185B;"></div>
-                        <span>Hortikultura</span>
+                        <div class="legend-color" style="background-color: #F44336;"></div><span>Cabai</span>
                     </div>
-                </div>
-            </div>
-            
-            <div class="chart-container">
-                <h3 class="chart-title">Distribusi Komoditas per Wilayah</h3>
-                <div class="chart-placeholder">
-                    [Grafik Distribusi Komoditas Akan Ditampilkan Di Sini]
+                     <div class="legend-item">
+                        <div class="legend-color" style="background-color: #9C27B0;"></div><span>Lainnya</span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Data Cuaca Page -->
+        <div id="datapetani-page" class="page">
+            <h2 class="page-title"><i class="fas fa-users"></i> Input & Proses Data Petani</h2>
+            
+            <div class="card" style="margin-bottom: 2rem;">
+                <div class="card-header" style="margin-bottom: 1rem;">
+                    <h3 class="card-title" style="font-size: 1.3rem; color: var(--primary-dark);">Formulir Input Data Petani</h3>
+                </div>
+                <form id="petaniForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="namaPetani">Nama Petani</label>
+                            <input type="text" id="namaPetani" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="kelompokTani">Kelompok Tani</label>
+                            <input type="text" id="kelompokTani">
+                        </div>
+                        <div class="form-group">
+                            <label for="kecamatan">Kecamatan</label>
+                            <select id="kecamatan" required>
+                                <option value="">Pilih Kecamatan</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="kelurahan">Kelurahan / Desa</label>
+                            <select id="kelurahan" required disabled>
+                                <option value="">Pilih Kecamatan Dulu</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="luasLahan">Luas Lahan (Ha)</label>
+                            <input type="number" id="luasLahan" step="0.01" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="komoditi">Jenis Komoditi</label>
+                            <select id="komoditi" required>
+                                <option value="">Pilih Komoditi</option>
+                                <option value="Padi">Padi</option>
+                                <option value="Jagung">Jagung</option>
+                                <option value="Ubi">Ubi</option>
+                                <option value="Tomat">Tomat</option>
+                                <option value="Cabai">Cabai</option>
+                                <option value="Sayur">Sayur</option>
+                                <option value="Lainnya">Lainnya</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Pilih Lokasi di Peta</label>
+                            <button type="button" class="btn btn-outline" id="pilihLokasiBtn">
+                                <i class="fas fa-map-marker-alt"></i> Pilih Lokasi di Peta
+                            </button>
+                            <div id="previewLokasi" class="location-preview">
+                                Belum ada lokasi dipilih
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">
+                        <i class="fas fa-cogs"></i> Proses & Simpan Data
+                    </button>
+                    <button type="button" class="btn btn-outline" id="clearDataBtn" style="margin-top: 1rem; margin-left: 10px; border-color: var(--warning); color: var(--warning);">
+                        <i class="fas fa-trash"></i> Hapus Semua Data
+                    </button>
+                </form>
+            </div>
+            
+            <h3 class="chart-title">Hasil Analisis Data Petani</h3>
+            
+            <div class="chart-container">
+                <h3 class="chart-title">Data Petani Tersimpan</h3>
+                <div class="table-wrapper">
+                    <table class="data-table" id="petaniTable">
+                        <thead>
+                            <tr>
+                                <th>Nama Petani</th>
+                                <th>Kecamatan</th>
+                                <th>Kelurahan</th>
+                                <th>Komoditi</th>
+                                <th>Luas (Ha)</th>
+                                <th>Est. Panen (Ton)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="6" style="text-align: center; color: var(--gray);">Belum ada data</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <div id="cuaca-page" class="page">
             <h2 class="page-title"><i class="fas fa-cloud-sun"></i> Data Cuaca</h2>
             
             <div class="weather-cards">
                 <div class="weather-card">
-                    <div class="weather-icon">
-                        <i class="fas fa-cloud-rain"></i>
-                    </div>
+                    <div class="weather-icon"><i class="fas fa-cloud-rain"></i></div>
                     <div class="weather-value" id="rainfall">45 mm</div>
                     <div class="weather-label">Curah Hujan</div>
                 </div>
-                
                 <div class="weather-card">
-                    <div class="weather-icon">
-                        <i class="fas fa-thermometer-half"></i>
-                    </div>
+                    <div class="weather-icon"><i class="fas fa-thermometer-half"></i></div>
                     <div class="weather-value" id="temperature">28°C</div>
                     <div class="weather-label">Suhu Rata-rata</div>
                 </div>
-                
                 <div class="weather-card">
-                    <div class="weather-icon">
-                        <i class="fas fa-tint"></i>
-                    </div>
+                    <div class="weather-icon"><i class="fas fa-tint"></i></div>
                     <div class="weather-value" id="humidity">82%</div>
                     <div class="weather-label">Kelembapan</div>
                 </div>
-                
                 <div class="weather-card">
-                    <div class="weather-icon">
-                        <i class="fas fa-wind"></i>
-                    </div>
+                    <div class="weather-icon"><i class="fas fa-wind"></i></div>
                     <div class="weather-value" id="wind">12 km/jam</div>
                     <div class="weather-label">Kecepatan Angin</div>
                 </div>
@@ -813,469 +1021,495 @@
             
             <div class="chart-container">
                 <h3 class="chart-title">Prakiraan Cuaca 7 Hari Ke Depan <span id="weatherLoading" class="weather-loading"></span></h3>
-                <div class="chart-placeholder" id="weatherChart">
-                    [Grafik Prakiraan Cuaca Akan Ditampilkan Di Sini]
-                </div>
-            </div>
-            
-            <div class="chart-container">
-                <h3 class="chart-title">Data Historis Curah Hujan</h3>
-                <div class="chart-placeholder">
-                    [Grafik Historis Curah Hujan Akan Ditampilkan Di Sini]
-                </div>
+                <div class="chart-placeholder" id="weatherChart">[Grafik Prakiraan Cuaca Akan Ditampilkan Di Sini]</div>
             </div>
         </div>
 
-        <!-- Early Warning Page -->
         <div id="warning-page" class="page">
             <h2 class="page-title"><i class="fas fa-exclamation-triangle"></i> Sistem Peringatan Dini</h2>
             
             <div class="warning-cards">
-                <div class="warning-card">
+                 <div class="warning-card">
                     <div class="warning-header">
                         <div class="warning-title">Potensi Kekeringan</div>
                         <div class="warning-badge badge-high">Tinggi</div>
                     </div>
-                    <div class="warning-location">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span>Wilayah Oba Tengah, Tidore</span>
-                    </div>
-                    <div class="warning-desc">
-                        Prediksi kekeringan dengan tingkat keparahan tinggi dalam 7-10 hari ke depan. 
-                        Dampak potensial pada tanaman padi fase generatif.
-                    </div>
+                    <div class="warning-location"><i class="fas fa-map-marker-alt"></i><span>Wilayah Oba Tengah, Tidore</span></div>
+                    <div class="warning-desc">Prediksi kekeringan dengan tingkat keparahan tinggi dalam 7-10 hari ke depan. Dampak potensial pada tanaman padi fase generatif.</div>
                     <div class="warning-actions">
                         <button class="btn btn-primary"><i class="fas fa-lightbulb"></i> Lihat Rekomendasi</button>
                         <button class="btn btn-outline"><i class="fas fa-info-circle"></i> Detail</button>
                     </div>
                 </div>
-                
-                <div class="warning-card medium">
+                 <div class="warning-card medium">
                     <div class="warning-header">
                         <div class="warning-title">Serangan Hama Wereng</div>
                         <div class="warning-badge badge-medium">Sedang</div>
                     </div>
-                    <div class="warning-location">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span>Kecamatan Tidore, Kota Tidore</span>
-                    </div>
-                    <div class="warning-desc">
-                        Laporan serangan hama wereng coklat pada tanaman padi usia 45-60 HST. 
-                        Tingkat kerusakan saat ini 15-20%.
-                    </div>
+                    <div class="warning-location"><i class="fas fa-map-marker-alt"></i><span>Kecamatan Tidore, Kota Tidore</span></div>
+                    <div class="warning-desc">Laporan serangan hama wereng coklat pada tanaman padi usia 45-60 HST. Tingkat kerusakan saat ini 15-20%.</div>
                     <div class="warning-actions">
                         <button class="btn btn-primary"><i class="fas fa-lightbulb"></i> Lihat Rekomendasi</button>
                         <button class="btn btn-outline"><i class="fas fa-info-circle"></i> Detail</button>
                     </div>
-                </div>
-                
-                <div class="warning-card low">
-                    <div class="warning-header">
-                        <div class="warning-title">Curah Hujan Tinggi</div>
-                        <div class="warning-badge badge-low">Rendah</div>
-                    </div>
-                    <div class="warning-location">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span>Wilayah Tidore Selatan</span>
-                    </div>
-                    <div class="warning-desc">
-                        Prakiraan curah hujan tinggi dalam 3-5 hari ke depan. 
-                        Berpotensi menyebabkan genangan pada lahan dengan drainase kurang baik.
-                    </div>
-                    <div class="warning-actions">
-                        <button class="btn btn-primary"><i class="fas fa-lightbulb"></i> Lihat Rekomendasi</button>
-                        <button class="btn btn-outline"><i class="fas fa-info-circle"></i> Detail</button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="chart-container">
-                <h3 class="chart-title">History Peringatan 3 Bulan Terakhir</h3>
-                <div class="chart-placeholder">
-                    [Grafik History Peringatan Akan Ditampilkan Di Sini]
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Footer -->
+    <!-- Modal Pilih Lokasi di Peta -->
+    <div id="modalPeta" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Pilih Lokasi Lahan</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="mapModal"></div>
+            </div>
+        </div>
+    </div>
+
     <footer>
         <div class="footer-container">
             <div class="footer-section">
                 <h3>GeoTani</h3>
                 <p>Platform pemantauan pertanian cerdas</p>
             </div>
-            
             <div class="footer-section">
                 <h3>Kontak</h3>
                 <p><i class="fas fa-envelope"></i> info@geotani.id</p>
                 <p><i class="fas fa-phone"></i> (021) 1234-5678</p>
             </div>
-            
             <div class="footer-section">
                 <h3>Tautan</h3>
                 <a href="#dashboard">Dashboard</a>
-                <a href="#peta">Peta Komoditas</a>
+                <a href="#peta">Peta Petani</a>
                 <a href="#cuaca">Data Cuaca</a>
             </div>
         </div>
-        
-        <div class="copyright">
-            &copy; 2023 GeoTani. All rights reserved.
-        </div>
+        <div class="copyright">&copy; 2023 GeoTani. All rights reserved.</div>
     </footer>
 
-    <!-- JavaScript -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // Mobile Menu Toggle
-        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
-            document.getElementById('navMenu').classList.toggle('show');
-        });
-
-        // Page Navigation with Smooth Scroll
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                // Update active nav link
-                document.querySelectorAll('.nav-link').forEach(item => {
-                    item.classList.remove('active');
-                });
-                this.classList.add('active');
-                
-                // Show selected page
-                const pageId = this.getAttribute('data-page') + '-page';
-                document.querySelectorAll('.page').forEach(page => {
-                    page.classList.remove('active');
-                });
-                document.getElementById(pageId).classList.add('active');
-                
-                // Close mobile menu if open
-                document.getElementById('navMenu').classList.remove('show');
-                
-                // Initialize map if on map page
-                if (this.getAttribute('data-page') === 'peta') {
-                    initMap();
-                    // Smooth scroll to top of page
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                }
-                
-                // Load weather data if on weather page
-                if (this.getAttribute('data-page') === 'cuaca') {
-                    loadWeatherData();
-                }
-            });
-        });
-
-        // Filter Buttons for Map
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.filter-btn').forEach(b => {
-                    b.classList.remove('active');
-                });
-                this.classList.add('active');
-                
-                // Filter markers on map based on selection
-                const filter = this.getAttribute('data-filter');
-                filterMapPolygons(filter);
-            });
-        });
-
-        // Fullscreen Toggle for Map
-        document.getElementById('fullscreenToggle').addEventListener('click', function() {
-            const mapContainer = document.querySelector('.map-container');
-            const mapPage = document.getElementById('peta-page');
-            
-            if (!mapPage.classList.contains('map-fullscreen')) {
-                // Enter fullscreen
-                mapPage.classList.add('map-fullscreen');
-                document.body.style.overflow = 'hidden';
-                
-                // Create close button
-                const closeBtn = document.createElement('button');
-                closeBtn.className = 'close-fullscreen';
-                closeBtn.innerHTML = '<i class="fas fa-times"></i>';
-                closeBtn.addEventListener('click', function() {
-                    mapPage.classList.remove('map-fullscreen');
-                    document.body.style.overflow = '';
-                    closeBtn.remove();
-                });
-                
-                mapPage.appendChild(closeBtn);
-                this.innerHTML = '<i class="fas fa-compress"></i> Keluar Layar Penuh';
-                
-                // Update map size
-                if (window.map) {
-                    setTimeout(() => {
-                        window.map.invalidateSize();
-                    }, 300);
-                }
-            } else {
-                // Exit fullscreen
-                mapPage.classList.remove('map-fullscreen');
-                document.body.style.overflow = '';
-                document.querySelector('.close-fullscreen').remove();
-                this.innerHTML = '<i class="fas fa-expand"></i> Layar Penuh';
-                
-                // Update map size
-                if (window.map) {
-                    setTimeout(() => {
-                        window.map.invalidateSize();
-                    }, 300);
-                }
-            }
-        });
-
-        // Map initialization and polygons
-        let mapPolygons = [];
+    document.addEventListener('DOMContentLoaded', function() {
         
-        function initMap() {
-            if (document.getElementById('map')._leaflet_id) {
-                window.map.invalidateSize();
+        // ===================================================================
+        // 1. DATA UTAMA & KONFIGURASI
+        // ===================================================================
+
+        // Data Kecamatan dan Kelurahan di Kota Tidore Kepulauan (dengan koordinat)
+        const tidoreData = {
+            "Tidore": {
+                "Gamtufkange": [0.7380, 127.4250], "Tomagoba": [0.6581, 127.4396], "Tuguwaji": [0.6702, 127.4435],
+                "Soasio": [0.6601, 127.4468], "Gurabati": [0.6895, 127.4215],
+            },
+            "Tidore Selatan": {
+                "Toboaru": [0.6455, 127.4285], "Gurabunga": [0.6359, 127.4093], "Tosa": [0.6180, 127.4300],
+            },
+            "Tidore Utara": {
+                "Rum": [0.7930, 127.4245], "Ome": [0.7651, 127.4523], "Mareku": [0.7498, 127.4611],
+            },
+            "Oba Utara": {
+                "Sofifi": [0.7580, 127.5710], "Galala": [0.8123, 127.5589],
+            },
+             "Oba Tengah": {
+                "Akelamo": [0.7063, 127.4322], "Tewe": [0.6912, 127.3512],
+            }
+        };
+
+        // Produktivitas rata-rata per komoditas (ton/ha)
+        const PRODUCTIVITY_RATES = {
+            'Padi': 6, 'Jagung': 7, 'Ubi': 10, 'Tomat': 8, 'Cabai': 9, 'Sayur': 7, 'Lainnya': 3
+        };
+        
+        // Warna untuk marker di peta
+        const COMMODITY_COLORS = {
+            'Padi': '#4CAF50', 'Jagung': '#FFC107', 'Ubi': '#795548', 'Tomat': '#FF5722', 
+            'Cabai': '#F44336', 'Sayur': '#8BC34A', 'Lainnya': '#9C27B0'
+        };
+
+        // Variabel global
+        let petaniData = JSON.parse(localStorage.getItem('petaniData')) || [];
+        let map;
+        let mapModal;
+        let mapMarkers = [];
+        let selectedCoords = null; // Menyimpan koordinat sementara yang dipilih di modal
+
+        // ===================================================================
+        // 2. INISIALISASI HALAMAN & EVENT LISTENERS
+        // ===================================================================
+
+        // Inisialisasi semua komponen saat halaman dimuat
+        function initializeApp() {
+            // Setup Navigasi
+            setupNavigation();
+            
+            // Setup Form Petani
+            initPetaniPage();
+            
+            // Setup Peta Utama
+            initMap();
+            
+            // Setup Modal Peta
+            initModalMap();
+            
+            // Muat & tampilkan semua data dari localStorage
+            updateAllViews();
+            
+            // Setup komponen lain
+            document.getElementById('mobileMenuBtn').addEventListener('click', () => document.getElementById('navMenu').classList.toggle('show'));
+            document.getElementById('fullscreenToggle').addEventListener('click', toggleMapFullscreen);
+            setupMapFilters();
+        }
+
+        // Pengaturan Navigasi Halaman
+        function setupNavigation() {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    document.querySelectorAll('.nav-link').forEach(item => item.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const pageId = this.getAttribute('data-page') + '-page';
+                    document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+                    document.getElementById(pageId).classList.add('active');
+                    
+                    document.getElementById('navMenu').classList.remove('show');
+                    
+                    // Penting: Invalidate map size saat tab peta aktif
+                    if (pageId === 'peta-page' && map) {
+                         setTimeout(() => map.invalidateSize(), 1);
+                    }
+                });
+            });
+        }
+        
+        // Inisialisasi Form di Halaman Data Petani
+        function initPetaniPage() {
+            const form = document.getElementById('petaniForm');
+            const clearBtn = document.getElementById('clearDataBtn');
+            const kecamatanSelect = document.getElementById('kecamatan');
+            const kelurahanSelect = document.getElementById('kelurahan');
+            const pilihLokasiBtn = document.getElementById('pilihLokasiBtn');
+
+            if (!form) return;
+
+            form.addEventListener('submit', handlePetaniFormSubmit);
+            clearBtn.addEventListener('click', clearAllPetaniData);
+            pilihLokasiBtn.addEventListener('click', openModal);
+            
+            // Isi dropdown kecamatan
+            Object.keys(tidoreData).forEach(kecamatan => {
+                const option = document.createElement('option');
+                option.value = kecamatan;
+                option.textContent = kecamatan;
+                kecamatanSelect.appendChild(option);
+            });
+            
+            // Event listener untuk mengubah kelurahan saat kecamatan dipilih
+            kecamatanSelect.addEventListener('change', () => {
+                kelurahanSelect.innerHTML = '<option value="">Pilih Kelurahan</option>';
+                const selectedKecamatan = kecamatanSelect.value;
+                if (selectedKecamatan && tidoreData[selectedKecamatan]) {
+                    Object.keys(tidoreData[selectedKecamatan]).forEach(kelurahan => {
+                        const option = document.createElement('option');
+                        option.value = kelurahan;
+                        option.textContent = kelurahan;
+                        kelurahanSelect.appendChild(option);
+                    });
+                    kelurahanSelect.disabled = false;
+                } else {
+                    kelurahanSelect.disabled = true;
+                }
+            });
+        }
+
+        // ===================================================================
+        // 3. FUNGSI PENGELOLAAN DATA (CRUD)
+        // ===================================================================
+
+        // Menangani submit form data petani
+        function handlePetaniFormSubmit(e) {
+            e.preventDefault();
+            const newData = {
+                id: Date.now(),
+                nama: document.getElementById('namaPetani').value,
+                kelompok: document.getElementById('kelompokTani').value,
+                kecamatan: document.getElementById('kecamatan').value,
+                kelurahan: document.getElementById('kelurahan').value,
+                luas: parseFloat(document.getElementById('luasLahan').value),
+                komoditi: document.getElementById('komoditi').value,
+                lokasi: selectedCoords // Simpan koordinat yang dipilih
+            };
+            
+            petaniData.push(newData);
+            localStorage.setItem('petaniData', JSON.stringify(petaniData));
+            
+            document.getElementById('petaniForm').reset();
+            document.getElementById('kelurahan').disabled = true; // Matikan lagi dropdown kelurahan
+            document.getElementById('previewLokasi').innerHTML = 'Belum ada lokasi dipilih';
+            selectedCoords = null; // Reset koordinat
+            
+            updateAllViews(); // Panggil fungsi utama untuk sinkronisasi
+        }
+
+        // Menghapus semua data petani
+        function clearAllPetaniData() {
+            if (confirm('Anda yakin ingin menghapus semua data petani?')) {
+                petaniData = [];
+                localStorage.removeItem('petaniData');
+                updateAllViews(); // Sinkronisasi setelah hapus
+            }
+        }
+
+        // ===================================================================
+        // 4. FUNGSI SINKRONISASI & PEMBARUAN TAMPILAN (VIEW)
+        // ===================================================================
+
+        // Fungsi utama untuk memperbarui SEMUA bagian yang tergantung pada data
+        function updateAllViews() {
+            updateDashboard();
+            updatePetaniTable();
+            updateMap();
+        }
+
+        // Memperbarui kartu & grafik di Dashboard
+        function updateDashboard() {
+            if (petaniData.length === 0) {
+                document.getElementById('dashboardLuasAktif').textContent = '0 Ha';
+                document.getElementById('dashboardEstimasiProduksi').textContent = '0 Ton';
+                document.getElementById('dashboardJumlahPetani').textContent = '0';
+                document.getElementById('dashboardLuasPerKecamatan').innerHTML = '[Tidak ada data untuk ditampilkan]';
+                document.getElementById('dashboardKomoditas').innerHTML = '[Tidak ada data untuk ditampilkan]';
+                return;
+            }
+
+            let totalLuas = 0, totalProduksi = 0;
+            let luasPerKecamatan = {};
+            let jumlahPerKomoditi = {};
+
+            petaniData.forEach(data => {
+                const estPanen = data.luas * (PRODUCTIVITY_RATES[data.komoditi] || 0);
+                totalLuas += data.luas;
+                totalProduksi += estPanen;
+                luasPerKecamatan[data.kecamatan] = (luasPerKecamatan[data.kecamatan] || 0) + data.luas;
+                jumlahPerKomoditi[data.komoditi] = (jumlahPerKomoditi[data.komoditi] || 0) + 1;
+            });
+
+            // Update Cards
+            document.getElementById('dashboardLuasAktif').textContent = `${totalLuas.toFixed(2)} Ha`;
+            document.getElementById('dashboardEstimasiProduksi').textContent = `${totalProduksi.toFixed(2)} Ton`;
+            document.getElementById('dashboardJumlahPetani').textContent = petaniData.length;
+            
+            // Update Grafik Placeholder
+            let kecamatanHTML = '<ul>';
+            for(const [kec, luas] of Object.entries(luasPerKecamatan)) {
+                kecamatanHTML += `<li>${kec}: <strong>${luas.toFixed(2)} Ha</strong></li>`;
+            }
+            document.getElementById('dashboardLuasPerKecamatan').innerHTML = kecamatanHTML + '</ul>';
+
+            let komoditasHTML = '<ul>';
+             for(const [kom, jumlah] of Object.entries(jumlahPerKomoditi)) {
+                komoditasHTML += `<li>${kom}: <strong>${jumlah} Petani</strong></li>`;
+            }
+            document.getElementById('dashboardKomoditas').innerHTML = komoditasHTML + '</ul>';
+        }
+
+        // Memperbarui tabel di halaman Data Petani
+        function updatePetaniTable() {
+            const tableBody = document.getElementById('petaniTable')?.querySelector('tbody');
+            if (!tableBody) return;
+            
+            if (petaniData.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Belum ada data</td></tr>';
                 return;
             }
             
-            // Set view to Tidore Islands
-            const map = L.map('map').setView([0.68, 127.40], 11);
-            window.map = map;
-            
+            let tableHtml = '';
+            petaniData.forEach(data => {
+                const estPanen = data.luas * (PRODUCTIVITY_RATES[data.komoditi] || 0);
+                tableHtml += `
+                    <tr>
+                        <td>${data.nama}</td>
+                        <td>${data.kecamatan}</td>
+                        <td>${data.kelurahan}</td>
+                        <td>${data.komoditi}</td>
+                        <td>${data.luas.toFixed(2)} Ha</td>
+                        <td>${estPanen.toFixed(2)} Ton</td>
+                    </tr>
+                `;
+            });
+            tableBody.innerHTML = tableHtml;
+        }
+
+        // ===================================================================
+        // 5. LOGIKA & FUNGSI PETA
+        // ===================================================================
+        
+        // Inisialisasi peta Leaflet utama
+        function initMap() {
+            if (map) return; // Jika peta sudah ada, jangan buat lagi
+            map = L.map('map').setView([0.68, 127.45], 11);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(map);
-            
-            // Define polygon areas for different commodities in Tidore
-            const polygonAreas = [
-                { 
-                    // Padi - Area Kalaodi
-                    coordinates: [
-                        [0.735, 127.377],
-                        [0.745, 127.390],
-                        [0.728, 127.405],
-                        [0.715, 127.392],
-                        [0.725, 127.375]
-                    ],
-                    title: 'Lahan Padi Kalaodi', 
-                    komoditas: 'padi',
-                    area: '45 Ha',
-                    variety: 'IR64 dan Ciherang',
-                    produksi: '28 Ton/Ha'
-                },
-                { 
-                    // Jagung - Area Tomalou
-                    coordinates: [
-                        [0.725, 127.427],
-                        [0.738, 127.440],
-                        [0.720, 127.455],
-                        [0.705, 127.442],
-                        [0.715, 127.425]
-                    ],
-                    title: 'Lahan Jagung Tomalou', 
-                    komoditas: 'jagung',
-                    area: '38 Ha',
-                    variety: 'Bisi 2 dan Pioneer',
-                    produksi: '7.2 Ton/Ha'
-                },
-                { 
-                    // Kedelai - Area Gurabati
-                    coordinates: [
-                        [0.685, 127.417],
-                        [0.695, 127.430],
-                        [0.678, 127.445],
-                        [0.665, 127.432],
-                        [0.675, 127.415]
-                    ],
-                    title: 'Lahan Kedelai Gurabati', 
-                    komoditas: 'kedelai',
-                    area: '32 Ha',
-                    variety: 'Anjasmoro dan Grobogan',
-                    produksi: '2.1 Ton/Ha'
-                },
-                { 
-                    // Hortikultura - Area Toseho
-                    coordinates: [
-                        [0.665, 127.367],
-                        [0.675, 127.380],
-                        [0.658, 127.395],
-                        [0.645, 127.382],
-                        [0.655, 127.365]
-                    ],
-                    title: 'Kebun Hortikultura Toseho', 
-                    komoditas: 'hortikultura',
-                    area: '28 Ha',
-                    variety: 'Cabai, Tomat, Bawang Merah',
-                    produksi: '12.5 Ton/Ha'
-                },
-                { 
-                    // Padi - Area Tambula
-                    coordinates: [
-                        [0.700, 127.450],
-                        [0.710, 127.463],
-                        [0.693, 127.478],
-                        [0.680, 127.465],
-                        [0.690, 127.448]
-                    ],
-                    title: 'Lahan Padi Tambula', 
-                    komoditas: 'padi',
-                    area: '52 Ha',
-                    variety: 'Inpari 32',
-                    produksi: '6.8 Ton/Ha'
-                },
-                { 
-                    // Jagung - Area Loto
-                    coordinates: [
-                        [0.640, 127.420],
-                        [0.650, 127.433],
-                        [0.633, 127.448],
-                        [0.620, 127.435],
-                        [0.630, 127.418]
-                    ],
-                    title: 'Perkebunan Jagung Loto', 
-                    komoditas: 'jagung',
-                    area: '41 Ha',
-                    variety: 'NASA 29',
-                    produksi: '8.1 Ton/Ha'
-                }
-            ];
-            
-            // Define styles for different commodities
-            const stylePadi = {
-                color: '#2E7D32',
-                weight: 2,
-                opacity: 0.8,
-                fillColor: '#4CAF50',
-                fillOpacity: 0.4
-            };
-            
-            const styleJagung = {
-                color: '#FF8F00',
-                weight: 2,
-                opacity: 0.8,
-                fillColor: '#FFC107',
-                fillOpacity: 0.4
-            };
-            
-            const styleKedelai = {
-                color: '#5D4037',
-                weight: 2,
-                opacity: 0.8,
-                fillColor: '#795548',
-                fillOpacity: 0.4
-            };
-            
-            const styleHortikultura = {
-                color: '#C2185B',
-                weight: 2,
-                opacity: 0.8,
-                fillColor: '#E91E63',
-                fillOpacity: 0.4
-            };
-            
-            // Add polygons to map
-            polygonAreas.forEach(area => {
-                let style;
-                
-                switch(area.komoditas) {
-                    case 'padi':
-                        style = stylePadi;
-                        break;
-                    case 'jagung':
-                        style = styleJagung;
-                        break;
-                    case 'kedelai':
-                        style = styleKedelai;
-                        break;
-                    case 'hortikultura':
-                        style = styleHortikultura;
-                        break;
-                    default:
-                        style = stylePadi;
+        }
+
+        // Inisialisasi peta di modal
+        function initModalMap() {
+            if (mapModal) return;
+            mapModal = L.map('mapModal').setView([0.68, 127.45], 11);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(mapModal);
+
+            // Tambahkan event click untuk memilih lokasi
+            let selectedMarker = null;
+            mapModal.on('click', function(e) {
+                // Hapus marker sebelumnya jika ada
+                if (selectedMarker) {
+                    mapModal.removeLayer(selectedMarker);
                 }
                 
-                const polygon = L.polygon(area.coordinates, style)
-                    .addTo(map)
-                    .bindPopup(`
-                        <div style="min-width: 200px;">
-                            <h4 style="margin: 0 0 10px 0; color: #2E7D32;">${area.title}</h4>
-                            <p><strong>Komoditas:</strong> ${area.komoditas}</p>
-                            <p><strong>Luas Area:</strong> ${area.area}</p>
-                            <p><strong>Varietas:</strong> ${area.variety}</p>
-                            <p><strong>Produktivitas:</strong> ${area.produksi}</p>
-                            <div style="margin-top: 10px; text-align: center;">
-                                <button class="btn btn-primary" style="padding: 5px 10px; font-size: 0.9rem;">
-                                    <i class="fas fa-chart-bar"></i> Lihat Detail
-                                </button>
-                            </div>
-                        </div>
+                // Buat marker baru di lokasi yang diklik
+                selectedMarker = L.marker(e.latlng).addTo(mapModal)
+                    .bindPopup('Lokasi dipilih: ' + e.latlng.lat.toFixed(4) + ', ' + e.latlng.lng.toFixed(4))
+                    .openPopup();
+                
+                // Simpan koordinat
+                selectedCoords = [e.latlng.lat, e.latlng.lng];
+                
+                // Update preview
+                document.getElementById('previewLokasi').innerHTML = 
+                    `<strong>Koordinat:</strong> ${selectedCoords[0].toFixed(4)}, ${selectedCoords[1].toFixed(4)}`;
+            });
+        }
+
+        // Membuat bentuk heksagon untuk peta
+        function createHexagon(center, radius) {
+            const points = [];
+            for (let i = 0; i < 6; i++) {
+                const angle = (i * 60) * (Math.PI / 180);
+                const dx = radius * Math.cos(angle);
+                const dy = radius * Math.sin(angle);
+                points.push([center[0] + dy, center[1] + dx]);
+            }
+            return points;
+        }
+
+        // Memperbarui heksagon di peta berdasarkan data petani
+        function updateMap(filter = 'all') {
+            if (!map) return;
+            
+            // Hapus semua heksagon lama
+            mapMarkers.forEach(marker => map.removeLayer(marker));
+            mapMarkers = [];
+            
+            // Filter data jika perlu
+            const filteredData = (filter === 'all') ? petaniData : petaniData.filter(d => d.komoditi === filter);
+
+            // Buat heksagon baru
+            filteredData.forEach(data => {
+                let coords = data.lokasi;
+                
+                // Jika tidak ada koordinat spesifik, gunakan koordinat default untuk kelurahan
+                if (!coords) {
+                    coords = tidoreData[data.kecamatan]?.[data.kelurahan];
+                }
+                
+                if (coords) {
+                    const radius = Math.sqrt(data.luas) * 0.005;
+                    const hexagonPoints = createHexagon(coords, radius);
+                    const hexagon = L.polygon(hexagonPoints, {
+                        color: COMMODITY_COLORS[data.komoditi] || '#9E9E9E',
+                        fillColor: COMMODITY_COLORS[data.komoditi] || '#9E9E9E',
+                        fillOpacity: 0.6,
+                        weight: 2
+                    }).addTo(map);
+                    
+                    hexagon.bindPopup(`
+                        <h4 style="margin: 0 0 10px 0; color: #2E7D32;">${data.nama}</h4>
+                        <p><strong>Komoditas:</strong> ${data.komoditi}</p>
+                        <p><strong>Luas:</strong> ${data.luas} Ha</p>
+                        <p><strong>Lokasi:</strong> ${data.kelurahan}, ${data.kecamatan}</p>
                     `);
-                
-                mapPolygons.push({
-                    polygon: polygon,
-                    komoditas: area.komoditas
+                    
+                    mapMarkers.push(hexagon);
+                }
+            });
+        }
+        
+        // Pengaturan tombol filter di peta
+        function setupMapFilters() {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    const filter = this.getAttribute('data-filter');
+                    updateMap(filter);
                 });
             });
         }
         
-        function filterMapPolygons(filter) {
-            mapPolygons.forEach(item => {
-                if (filter === 'all' || item.komoditas === filter) {
-                    item.polygon.addTo(window.map);
-                } else {
-                    window.map.removeLayer(item.polygon);
-                }
-            });
-        }
+        // Fungsi untuk toggle fullscreen peta
+        function toggleMapFullscreen() {
+            const mapPage = document.getElementById('peta-page');
+            mapPage.classList.toggle('map-fullscreen');
+            document.body.style.overflow = mapPage.classList.contains('map-fullscreen') ? 'hidden' : '';
 
-        // Weather data loading (simulated real-time data for Tidore)
-        function loadWeatherData() {
-            const loadingElement = document.getElementById('weatherLoading');
-            loadingElement.style.display = 'inline-block';
-            
-            // Simulate API call delay
-            setTimeout(() => {
-                // Generate realistic weather data for Tidore
-                const rainfall = (Math.random() * 50 + 20).toFixed(1);
-                const temperature = (Math.random() * 5 + 26).toFixed(1);
-                const humidity = (Math.random() * 20 + 70).toFixed(0);
-                const wind = (Math.random() * 10 + 5).toFixed(1);
-                
-                // Update weather values
-                document.getElementById('rainfall').textContent = rainfall + ' mm';
-                document.getElementById('temperature').textContent = temperature + '°C';
-                document.getElementById('humidity').textContent = humidity + '%';
-                document.getElementById('wind').textContent = wind + ' km/jam';
-                
-                // Update weather chart placeholder
-                document.getElementById('weatherChart').innerHTML = 
-                    '<div style="text-align: center; padding: 20px; color: #4CAF50;">' +
-                    '<i class="fas fa-check-circle" style="font-size: 2rem; margin-bottom: 10px;"></i><br>' +
-                    'Data cuaca terkini untuk Kota Tidore telah dimuat<br>' +
-                    '<small>Terakhir diperbarui: ' + new Date().toLocaleTimeString() + '</small>' +
-                    '</div>';
-                
-                loadingElement.style.display = 'none';
-            }, 1500);
-        }
-
-        // Initialize the dashboard on load
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize map if on map page
-            if (document.getElementById('peta-page').classList.contains('active')) {
-                initMap();
+            // Buat atau hapus tombol close
+            let closeBtn = mapPage.querySelector('.close-fullscreen');
+            if (mapPage.classList.contains('map-fullscreen') && !closeBtn) {
+                closeBtn = document.createElement('button');
+                closeBtn.className = 'close-fullscreen';
+                closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                closeBtn.onclick = toggleMapFullscreen;
+                mapPage.appendChild(closeBtn);
+            } else if (closeBtn) {
+                closeBtn.remove();
             }
             
-            // Load weather data if on weather page
-            if (document.getElementById('cuaca-page').classList.contains('active')) {
-                loadWeatherData();
-            }
+            this.innerHTML = mapPage.classList.contains('map-fullscreen') ? '<i class="fas fa-compress"></i> Keluar' : '<i class="fas fa-expand"></i> Layar Penuh';
             
-            // Set up periodic weather updates (every 5 minutes)
-            setInterval(() => {
-                if (document.getElementById('cuaca-page').classList.contains('active')) {
-                    loadWeatherData();
-                }
-            }, 300000);
+            if (map) {
+                setTimeout(() => map.invalidateSize(), 300);
+            }
+        }
+
+        // ===================================================================
+        // 6. FUNGSI MODAL PETA
+        // ===================================================================
+        
+        // Membuka modal peta
+        function openModal() {
+            document.getElementById('modalPeta').style.display = 'block';
+            
+            // Inisialisasi peta modal jika belum ada
+            if (!mapModal) {
+                initModalMap();
+            } else {
+                // Jika sudah ada, invalidate size agar peta tampil benar
+                setTimeout(() => mapModal.invalidateSize(), 1);
+            }
+        }
+
+        // Menutup modal peta
+        function closeModal() {
+            document.getElementById('modalPeta').style.display = 'none';
+        }
+
+        // Setup event listeners untuk modal
+        document.querySelector('.close-modal').addEventListener('click', closeModal);
+        document.getElementById('modalPeta').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
         });
+        
+        // Panggil fungsi inisialisasi utama
+        initializeApp();
+    });
     </script>
 </body>
 </html>
